@@ -245,27 +245,8 @@ This makes the system defensible and compatible with high-integrity documentatio
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  CL[Clinician] --> UI[Web Editor<br/>React or Angular]
-  UI --> API[Backend APIs<br/>FastAPI or ASP.NET Core]
-
-  API --> ORCH[Artificial Intelligence Orchestrator]
-  ORCH --> TPL[Template Engine<br/>SOAP / DAP / BIRP Rules]
-  ORCH --> RET[Retriever<br/>Hybrid Search]
-  ORCH --> LLM[Guardrailed Large Language Model Writer]
-  ORCH --> CRIT[Critic Agent<br/>Fact + Template Validator]
-  ORCH --> PHI[Protected Health Information Safety Layer<br/>(optional)]
-
-  RET --> VDB[(Vector Database<br/>pgvector / FAISS / Chroma)]
-  API --> SDB[(Structured Database<br/>PostgreSQL)]
-  API --> AUDIT[Audit Store<br/>Versioned Notes]
-  API --> OBS[Observability Hooks<br/>OpenTelemetry / Metrics]
-
-  CRIT --> ORCH
-  PHI --> ORCH
-  ORCH --> API
-  API --> UI
+``
+<img width="1985" height="687" alt="Insightnotes" src="https://github.com/user-attachments/assets/84638b9c-95a1-4314-9352-434693cc2eca" />
 ```
 
 The architecture is intentionally modular so the system can scale into:
