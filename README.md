@@ -244,11 +244,7 @@ This makes the system defensible and compatible with high-integrity documentatio
 ---
 
 ## Architecture
-
-``
 <img width="1985" height="687" alt="Insightnotes" src="https://github.com/user-attachments/assets/84638b9c-95a1-4314-9352-434693cc2eca" />
-```
-
 The architecture is intentionally modular so the system can scale into:
 
 - organization-specific template ecosystems  
