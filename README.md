@@ -13,19 +13,21 @@
 
 ![License](https://img.shields.io/badge/License-MIT-success)
 ![Status](https://img.shields.io/badge/Status-Public%20Prototype-blue)
+![Clinical%20Focus](https://img.shields.io/badge/Domain-Behavioral%20Health%20%7C%20Clinical%20Documentation-0b7285)
+![Notes](https://img.shields.io/badge/Notes-SOAP%20%7C%20DAP%20%7C%20BIRP%20%7C%20Progress-informational)
 ![Backend](https://img.shields.io/badge/Backend-FastAPI%20%7C%20ASP.NET%20Core-009688)
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%7C%20Angular-3178C6)
-![AI](https://img.shields.io/badge/AI-RAG%20%7C%20Agentic%20Quality-blueviolet)
-![Privacy](https://img.shields.io/badge/Privacy-Protected%20Health%20Information%20(PHI)%20Aware-critical)
+![Language](https://img.shields.io/badge/Languages-Python%20%7C%20C%23%20%7C%20TypeScript-2f74c0)
+![Database](https://img.shields.io/badge/DB-PostgreSQL%20%7C%20pgvector-336791)
+![Architecture](https://img.shields.io/badge/Architecture-SOA--friendly%20%7C%20Modular%20AI-black)
+![AI](https://img.shields.io/badge/AI-Retrieval--Augmented%20Generation%20(RAG)%20%7C%20Agentic%20Critic-blueviolet)
+![Safety](https://img.shields.io/badge/Safety-PHI--aware%20Gates%20%7C%20Template%20Guards-critical)
+![Observability](https://img.shields.io/badge/Observability-OpenTelemetry%20%7C%20Metrics%20Hooks-111111)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-ready-brightgreen)
 
 InsightNotes is a **clinical documentation assistant** engineered to transform structured encounter inputs into **high-quality, template-aligned clinical note drafts** for formats such as **Subjective Objective Assessment Plan (SOAP)**, **Data Assessment Plan (DAP)**, **Behavior Intervention Response Plan (BIRP)**, progress notes, and discharge summaries.
 
-Unlike generic note generators optimized purely for speed, InsightNotes is designed for **high-integrity clinical workflows** where **structure, evidence grounding, traceability, and privacy** matter as much as rapid drafting. The system combines:
-
-- **Deterministic template rules** (truth layer)
-- **Evidence-linked Retrieval-Augmented Generation (RAG)** (trust layer)
-- **Multi-agent validation** (quality and safety layer)
-- **Audit-ready versioning** (compliance and reproducibility layer)
+This repository is purposefully built to look and read like a **real healthcare documentation platform** backed by disciplined software engineering, not a one-off prompt experiment. The system emphasizes what matters in clinical environments: **structure, consistency, auditability, and clinician control**.
 
 **Core philosophy**  
 **Structure first → Retrieval second → Generation last → Critic always**
@@ -33,9 +35,10 @@ Unlike generic note generators optimized purely for speed, InsightNotes is desig
 ---
 
 ## Table of Contents
-- Overview
-- Why InsightNotes
-- What It Does
+- The Problem This Solves
+- Vision and Motivation
+- What InsightNotes Does
+- Design Tenets
 - What’s Implemented
 - Key Features
 - Impact and Metrics
@@ -51,70 +54,123 @@ Unlike generic note generators optimized purely for speed, InsightNotes is desig
 
 ---
 
-## Overview
+## The Problem This Solves
 
-Clinical documentation often consumes significant clinician time and introduces risk through:
-- inconsistent template coverage  
-- copy-forward drift  
-- missing sections  
-- subtle cross-section contradictions  
-- low visibility into the rationale behind generated statements  
+Clinical documentation is invisible infrastructure.  
+When it works, patients move through care smoothly.  
+When it breaks, the costs surface everywhere: clinician burnout, incomplete records, compliance risk, inconsistent clinical narratives, and downstream billing or continuity failures.
 
-InsightNotes addresses these issues by using **template-governed generation** with **evidence traceability** and **critic-driven validation** to ensure drafts are both fast and clinically structured.
+In real practice settings—especially behavioral health and high-volume clinics—the friction is rarely about “writing English.” It’s about:
 
----
+- hitting the **right structured format** every time  
+- ensuring mandatory sections are never skipped  
+- keeping assessment, intervention, and plan consistent across notes  
+- preventing duplicate or conflicting narratives  
+- reducing cognitive load while preserving clinical judgment  
+- supporting organization-specific expectations without brittle manual rework  
 
-## Why InsightNotes
-
-Documentation systems in healthcare must balance two constraints:
-
-1. **Time pressure**
-2. **Clinical integrity**
-
-InsightNotes is intentionally built to *constrain* generative flexibility with deterministic structure to support:
-- safer drafting in Protected Health Information (PHI)-aware settings  
-- consistent section completeness  
-- auditable, explainable clinical text  
-- testable quality gates  
+InsightNotes is designed to reduce time spent on repetitive drafting **without producing ungrounded or structurally unsafe output**.
 
 ---
 
-## What It Does
+## Vision and Motivation
+
+I wanted to build a documentation system that behaves like a **reliable clinical co-author**:
+
+- fast enough to be used daily  
+- structured enough to support real templates  
+- transparent enough to trust  
+- strict enough to catch missing or contradictory content  
+- flexible enough to evolve across organizations and specialties  
+
+Rather than building “an LLM that writes notes,” I built an architecture that treats the LLM as **one component inside a larger quality machine**.
+
+That decision defines everything in this repository:
+
+- templates act as the structural truth  
+- retrieval supplies approved evidence  
+- generation fills gaps inside narrow boundaries  
+- a critic agent acts as the safety firewall  
+- audit logs preserve clinical defensibility  
+
+---
+
+## What InsightNotes Does
 
 Given clinician-entered encounter facts and a selected note type, InsightNotes:
 
-1. Constructs a **section plan** using validated templates.
-2. Performs **hybrid retrieval** (metadata filtering + vector similarity + rule-priority re-ranking) over approved sources.
-3. Generates **section-by-section drafts** using a guardrailed **Large Language Model (LLM)** aligned to template constraints.
-4. Applies a **Critic Agent** to flag:
+1. Constructs a **section plan** using validated templates.  
+2. Performs **hybrid retrieval** over approved sources:  
+   - metadata filtering (note type, specialty, section)  
+   - vector similarity search  
+   - rule-priority and section-relevance re-ranking  
+3. Generates **section-by-section drafts** using a guardrailed **Large Language Model (LLM)** aligned to template constraints.  
+4. Applies a **Critic Agent** to flag:  
    - missing mandatory sections  
    - cross-section contradictions  
    - assessment → plan → follow-up gaps  
    - statements without evidence anchors  
 5. Produces a **versioned, clinician-reviewable draft** with warnings and evidence references.
 
+This yields output that is not only faster, but **safer and more consistent** for structured documentation workflows.
+
+---
+
+## Design Tenets
+
+InsightNotes follows six rules that keep the system clinically grounded:
+
+1. **Templates are the contract.**  
+   If the template requires a section, the system must surface it—even if the LLM would omit it.
+
+2. **Evidence must be visible.**  
+   Clinicians should understand what policy, reference, or rule the system used to justify a statement.
+
+3. **Generation is bounded, not free-form.**  
+   LLM output is valuable only inside clinical guardrails.
+
+4. **Critic-first quality.**  
+   The default state is skepticism. The critic does not exist to “polish”—it exists to block silent errors.
+
+5. **Auditability is a feature.**  
+   Versioning, diffs, and prompt lineage matter when documentation is a legal and clinical artifact.
+
+6. **Integration realism.**  
+   The architecture remains modular and Service-Oriented Architecture-friendly to support future clinical platform integration.
+
 ---
 
 ## What’s Implemented (Public Prototype Scope)
 
 ### Implemented
-- Template-driven scaffolding for **SOAP**, **DAP**, and **BIRP**
-- Section-aware hybrid retrieval pipeline
-- Evidence-linked drafting with constrained prompts
-- Critic validation for completeness and cross-section consistency
-- Versioned draft output model with audit hooks
-- Foundational frontend workflow (Draft → Review → Finalize) where applicable
+
+- Template-driven scaffolding for:  
+  - **Subjective Objective Assessment Plan (SOAP)**  
+  - **Data Assessment Plan (DAP)**  
+  - **Behavior Intervention Response Plan (BIRP)**  
+- Section-aware hybrid retrieval pipeline  
+- Evidence-linked drafting with constrained prompts  
+- Critic validation for completeness and cross-section consistency  
+- Versioned draft output model with audit hooks  
+- Foundational frontend workflow (Draft → Review → Finalize), where applicable  
+- PostgreSQL structured store with optional pgvector evidence indexing  
+- Clear backend/ frontend boundaries to support **Angular**, **React**, and **TypeScript** environments  
 
 ### In Progress
-- Specialty-specific template packs
-- Expanded golden-note evaluation suite
-- Temporal note comparison signals
+
+- Specialty-specific template packs  
+- Expanded golden-note evaluation suite  
+- Temporal note comparison analytics  
+- Clinician edit-distance measurement per section  
 
 ---
 
 ## Key Features
 
-### ✅ Multi-format note generation
+### Multi-format note generation
+
+InsightNotes supports common clinical and behavioral health documentation flows:
+
 - Subjective Objective Assessment Plan (SOAP)  
 - Data Assessment Plan (DAP)  
 - Behavior Intervention Response Plan (BIRP)  
@@ -122,46 +178,68 @@ Given clinician-entered encounter facts and a selected note type, InsightNotes:
 - Discharge Summaries  
 - Custom organizational templates  
 
-### ✅ Evidence-linked Retrieval-Augmented Generation (RAG)
-- Retrieval filtered by:
-  - note type  
-  - specialty  
-  - section  
-  - rule priority  
-- Outputs designed to support:
-  - evidence visibility  
-  - template rule coverage  
-  - explainable suggestions  
+The engine is designed so new templates can be added as rule packs rather than rewriting the drafting pipeline.
 
-### ✅ Agentic quality gates
-- **Planner Agent** — constructs section plan  
-- **Retriever Agent** — selects evidence  
-- **Writer Agent** — drafts structured text  
+### Evidence-linked Retrieval-Augmented Generation (RAG)
+
+Retrieval is:
+
+- section-specific  
+- role- and template-aware  
+- priority-ranked  
+
+Filters include:
+
+- note type  
+- specialty  
+- section  
+- rule priority  
+
+Outputs are designed to support:
+
+- evidence visibility  
+- rule coverage transparency  
+- explainable suggestions  
+
+### Agentic quality gates
+
+A lightweight, production-style orchestration chain:
+
+- **Planner Agent** — constructs the section plan and mandatory checks  
+- **Retriever Agent** — selects evidence bounded by section rules  
+- **Writer Agent** — drafts text inside strict constraints  
 - **Critic Agent** — validates factual and template alignment  
-- **Protected Health Information (PHI) Safety Layer** (optional) — checks for unsafe leakage patterns  
+- **Protected Health Information (PHI) Safety Layer** (optional)  
 
-### ✅ Audit-ready note versioning
+The critic is designed to surface “clinician-grade” warnings, not generic language prompts.
+
+### Audit-ready note versioning
+
 Each draft can record:
+
 - input snapshot  
 - evidence map  
 - model and prompt version  
 - structured text diff  
 - reviewer actions  
 
+This makes the system defensible and compatible with high-integrity documentation expectations.
+
 ---
 
 ## Impact and Metrics (Targets)
 
 - **Documentation time reduction target:** 35%–55% for routine notes  
-- **First-draft usability target:** 70%–85% requiring minimal edits  
+- **First-draft usability target:** 70%–85% with minimal edits  
 - **Template completeness detection target:** > 90% via critic checks  
 - **Latency targets under load:**  
-  - p50 < 220 milliseconds  
-  - p95 < 480 milliseconds at 50+ concurrent draft requests  
-- **Trust metrics:**  
+  - 50th percentile (p50) < 220 milliseconds  
+  - 95th percentile (p95) < 480 milliseconds at 50+ concurrent draft requests  
+- **Trust signals tracked by design:**  
   - evidence coverage ratio  
   - unsupported-claim flag rate  
   - clinician edit distance per section  
+  - contradiction frequency per note type  
 
 ---
 
@@ -173,24 +251,35 @@ flowchart LR
   UI --> API[Backend APIs<br/>FastAPI or ASP.NET Core]
 
   API --> ORCH[Artificial Intelligence Orchestrator]
-  ORCH --> TPL[Template Engine<br/>SOAP/DAP/BIRP Rules]
+  ORCH --> TPL[Template Engine<br/>SOAP / DAP / BIRP Rules]
   ORCH --> RET[Retriever<br/>Hybrid Search]
-  ORCH --> LLM[Guardrailed LLM Writer]
+  ORCH --> LLM[Guardrailed Large Language Model Writer]
   ORCH --> CRIT[Critic Agent<br/>Fact + Template Validator]
-  ORCH --> PHI[PHI Safety Layer<br/>(optional)]
+  ORCH --> PHI[Protected Health Information Safety Layer<br/>(optional)]
 
   RET --> VDB[(Vector Database<br/>pgvector / FAISS / Chroma)]
   API --> SDB[(Structured Database<br/>PostgreSQL)]
   API --> AUDIT[Audit Store<br/>Versioned Notes]
-  API --> OBS[Observability Hooks<br/>Metrics / Logs / Traces]
+  API --> OBS[Observability Hooks<br/>OpenTelemetry / Metrics]
 
   CRIT --> ORCH
   PHI --> ORCH
   ORCH --> API
   API --> UI
+```
+
+The architecture is intentionally modular so the system can scale into:
+
+- organization-specific template ecosystems  
+- multi-role clinician workflows  
+- integration into broader clinical platforms  
+- future event-driven or Service-Oriented Architecture deployments  
+
+---
+
 ## Draft Lifecycle
-mermaid
-Copy code
+
+```mermaid
 sequenceDiagram
   participant UI as Clinician User Interface
   participant API as Backend API
@@ -212,77 +301,93 @@ sequenceDiagram
   AU-->>ORCH: version_id
   ORCH-->>API: Draft + warnings + evidence_refs
   API-->>UI: Render editor + review gates
+```
+
+This maps to real clinician intent:
+
+- draft quickly  
+- see structural gaps instantly  
+- understand evidence and rationale  
+- refine with minimal cognitive overhead  
+- finalize with confidence  
+
+---
+
 ## Data Structures and Algorithms
+
 InsightNotes intentionally constrains generative flexibility using deterministic structure to improve reliability.
 
-Core data structures
-TemplateRule
+### Core data structures
 
-note_type, section, required_fields, constraints
+**TemplateRule**  
+- note_type, section, required_fields, constraints  
 
-EvidenceChunk
+**EvidenceChunk**  
+- source, specialty_tags, effective_date, embedding_id  
 
-source, specialty_tags, effective_date, embedding_id
+**SectionDependencyGraph**  
+- enforces assessment → plan → follow-up consistency  
 
-SectionDependencyGraph
+**NoteVersion**  
+- author, timestamp, diff, evidence_refs  
 
-enforces assessment → plan → follow-up consistency
+### Key algorithms
 
-NoteVersion
+**Hybrid retrieval**  
+- metadata filtering by note type, specialty, and section  
+- vector similarity search  
+- rule-priority and section-relevance re-ranking  
 
-author, timestamp, diff, evidence_refs
+**Section-constrained generation**  
+- per-section prompts with strict template and evidence inputs  
 
-Key algorithms
-Hybrid retrieval
+**Critic-driven validation**  
+- missing mandatory content detection  
+- cross-section contradiction checks  
+- evidence-anchor verification  
 
-metadata filtering by note type, specialty, and section
+This architecture targets the kind of failures that matter in real documentation systems:  
+not just hallucinations, but **structural omissions and plan inconsistency**.
 
-vector similarity search
+---
 
-rule-priority and section-relevance re-ranking
+## Technology Stack
 
-Section-constrained generation
+This project is intentionally compatible with modern healthcare engineering environments.
 
-per-section prompts with strict template and evidence inputs
+### Backend
 
-Critic-driven validation
+- Python  
+- FastAPI  
+- Pydantic  
+- PostgreSQL  
+- Vector search: pgvector / FAISS / Chroma  
+- Optional service modules in C# with ASP.NET Core, where applicable  
 
-missing mandatory content detection
+### Frontend
 
-cross-section contradiction checks
+- React + TypeScript  
+  or  
+- Angular + TypeScript  
 
-evidence-anchor verification
+### Artificial Intelligence
 
-Technology Stack (Edit to match your implementation)
-Backend
-Python
+- Retrieval-Augmented Generation (RAG)  
+- Multi-agent orchestration  
+- Critic-based validation  
+- Optional local model pathway  
 
-FastAPI
+### Observability and reliability
 
-Pydantic
+- OpenTelemetry-compatible instrumentation hooks  
+- Metrics-first latency measurement  
+- Golden-note evaluation scaffolding  
 
-PostgreSQL
+---
 
-Vector search: pgvector / FAISS / Chroma
+## Repository Structure
 
-Frontend
-React + TypeScript
-or
-
-Angular + TypeScript
-
-Artificial Intelligence
-Retrieval-Augmented Generation (RAG)
-
-Multi-agent orchestration
-
-Critic-based validation
-
-Optional local model pathway
-
-Repository Structure
-text
-Copy code
+```text
 /
 ├── backend/
 │   ├── api/
@@ -316,54 +421,58 @@ Copy code
         ├── sample-soap.md
         ├── sample-dap.md
         └── sample-birp.md
-Quickstart
-Clone
+```
 
+---
+
+## Quickstart
+
+```bash
 git clone <YOUR_REPO_URL>
-
 cd INSIGHTNOTES-CLINICAL-NOTES-DOCUMENTATION
+```
 
-Backend
+### Backend
 
-Create .env from .env.example
+- Create `.env` from `.env.example`  
+- Start the API server  
 
-Start the API server
+### Frontend
 
-Frontend
+- Install dependencies  
+- Run the development server  
 
-Install dependencies
+---
 
-Run the development server
+## Safety and Privacy
 
-Safety and Privacy
 InsightNotes applies healthcare-grade engineering patterns:
 
-Role-Based Access Control (RBAC)
+- Role-Based Access Control (RBAC)  
+- least-privilege access  
+- versioned audit logs  
+- template constraints prioritized over free-form generation  
+- evidence transparency for clinician review  
+- optional local inference  
 
-least-privilege access
-
-versioned audit logs
-
-template constraints prioritized over free-form generation
-
-evidence transparency for clinician review
-
-optional local inference
-
-This is a public engineering project.
+This is a public engineering project.  
 It is not presented as a certified clinical product or production Electronic Health Record (EHR) system.
 
-Roadmap
-Specialty-specific template packs
+---
 
-Temporal drafting intelligence
+## Roadmap
 
-Expanded evaluation harness
+- Specialty-specific template packs  
+- Temporal drafting intelligence  
+- Expanded evaluation harness  
+- Export-ready outputs (Portable Document Format (PDF) + structured formats)  
+- Clinician edit-distance analytics and quality dashboards  
 
-Export-ready outputs (Portable Document Format (PDF) + structured formats)
+---
 
-Maintainer
-Pavankalyan Ghanta
-GitHub: <your link>
-Portfolio: <your link>
-LinkedIn: <your link>
+## Maintainer
+
+**Pavankalyan Ghanta**  
+GitHub: <your link>  
+Portfolio: <your link>  
+LinkedIn: <your link>  
